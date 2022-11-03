@@ -162,7 +162,7 @@ def ConleyMorseGraph(phase_subdiv, lower_bounds, upper_bounds, g, confidence_lev
             return y_rect
     else:
         # Compute domain graph using Lispschitz constant
-        domain_graph, domain_boxes = ComputeDomainGraph(phase_subdiv, lower_bounds, upper_bounds, g, confidence_level, L)
+        domain_graph, domain_boxes = ComputeDomainGraph(phase_subdiv, lower_bounds, upper_bounds, g, confidence_level, L, check_range)
 
         # Define a new box map from the multi-valued map constructed above.
         # The image of a box is just a rectangle containing all the boxes
