@@ -1,6 +1,6 @@
 # GPDynamics.py
 # Marcio Gameiro
-# 2022-11-03
+# 2022-11-04
 # MIT LICENSE
 
 import CMGDB
@@ -44,6 +44,8 @@ def box_cover(domain_boxes, rect):
     return list(range(v_min, v_max))
 
 def ComputeDomainGraph(phase_subdiv, lower_bounds, upper_bounds, g, confidence_level, L, check_range):
+    # Flag for out of bounds
+    out_of_bounds = False
     # List of phase space boxes
     domain_boxes = np.linspace(lower_bounds[0], upper_bounds[0], 2**phase_subdiv + 1)
     # Center points of phase space boxes
@@ -54,9 +56,18 @@ def ComputeDomainGraph(phase_subdiv, lower_bounds, upper_bounds, g, confidence_l
     sigma_center = np.array([(g([x])[1]) for x in center_points])
     # Grid size h
     h = domain_boxes[1] - domain_boxes[0]
-    # Get mean plus or minus confidence_level times std at center points
-    g_l_center = g_center - confidence_level * sigma_center
-    g_u_center = g_center + confidence_level * sigma_center
+    # We want the square root so the product with the (square root of) the
+    # confidence level for the Lispschitz constant gives the confidence level
+    confidence = np.sqrt(confidence_level)
+    # Raise to the power 1/num_points so the product gives confidence level
+    confidence = confidence**(1 / (2**(phase_subdiv - 1)))
+    # Get the alpha value
+    alpha = 1.0 - confidence
+    # Get critical value
+    z_critical = stats.norm.ppf(1.0 - alpha / 2)
+    # Get mean plus or minus critical value times std at center points
+    g_l_center = g_center - z_critical * sigma_center
+    g_u_center = g_center + z_critical * sigma_center
     # Number of points (edges vertices)
     num_points = len(domain_boxes)
     # Number of vertices (edges)
@@ -74,7 +85,8 @@ def ComputeDomainGraph(phase_subdiv, lower_bounds, upper_bounds, g, confidence_l
         b_cover = box_cover(domain_boxes, rect)
         # Check if image is out of range
         if check_range and ((-1 in b_cover) or (num_points - 1 in b_cover)):
-            raise ValueError('Image of multi-valued map out of bounds.')
+            out_of_bounds = True
+            # raise ValueError('Image of multi-valued map out of bounds.')
         # Discard out of range cases (-1 and num_points - 1)
         # List of grid boxes indices covering interval
         grid_cover = [v for v in b_cover if v not in [-1, num_points - 1]]
@@ -110,7 +122,8 @@ def ComputeDomainGraph(phase_subdiv, lower_bounds, upper_bounds, g, confidence_l
         b_cover = box_cover(domain_boxes, rect)
         # Check if image is out of range
         if check_range and ((-1 in b_cover) or (num_points - 1 in b_cover)):
-            raise ValueError('Image of multi-valued map out of bounds.')
+            out_of_bounds = True
+            # raise ValueError('Image of multi-valued map out of bounds.')
         # Discard out of range cases (-1 and num_points - 1)
         # List of grid boxes indices covering interval
         grid_cover = [v for v in b_cover if v not in [-1, num_points - 1]]
@@ -131,7 +144,8 @@ def ComputeDomainGraph(phase_subdiv, lower_bounds, upper_bounds, g, confidence_l
     b_cover = box_cover(domain_boxes, rect)
     # Check if image is out of range
     if check_range and ((-1 in b_cover) or (num_points - 1 in b_cover)):
-        raise ValueError('Image of multi-valued map out of bounds.')
+        out_of_bounds = True
+        # raise ValueError('Image of multi-valued map out of bounds.')
     # Discard out of range cases (-1 and num_points - 1)
     # List of grid boxes indices covering interval
     grid_cover = [v for v in b_cover if v not in [-1, num_points - 1]]
@@ -140,7 +154,9 @@ def ComputeDomainGraph(phase_subdiv, lower_bounds, upper_bounds, g, confidence_l
     # Add grid cover to list of edges
     for index in grid_cover:
         domain_graph.add_edge(k1 - 1, index)
-
+    # Print out of bounds message
+    if out_of_bounds:
+        print('Image of multi-valued map out of bounds.')
     return domain_graph, domain_boxes
 
 def ConleyMorseGraph(phase_subdiv, lower_bounds, upper_bounds, g, confidence_level, L=None, check_range=False):
@@ -155,9 +171,18 @@ def ConleyMorseGraph(phase_subdiv, lower_bounds, upper_bounds, g, confidence_lev
             y1, y2 = g([x1])[0], g([x2])[0]
             # Standard deviation at the end points
             sigma1, sigma2 = g([x1])[1], g([x2])[1]
+            # Here we are not using Lipschitz constant L (so no sqrt)
+            # Just computing pointwise confidence intervals. Uncomment line below
+            # to get uniform confidence (notice we are using all edpoints)
+            # Raise to the power 1/num_points so the product gives confidence level
+            # confidence = confidence_level**(1 / (2**(phase_subdiv + 1)))
+            # Get the alpha value
+            alpha = 1.0 - confidence
+            # Get critical value
+            z_critical = stats.norm.ppf(1.0 - alpha / 2)
             # Get end points of covering rectangle
-            y_rect1 = min(y1 - confidence_level * sigma1, y2 - confidence_level * sigma2)
-            y_rect2 = max(y1 + confidence_level * sigma1, y2 + confidence_level * sigma2)
+            y_rect1 = min(y1 - z_critical * sigma1, y2 - z_critical * sigma2)
+            y_rect2 = max(y1 + z_critical * sigma1, y2 + z_critical * sigma2)
             y_rect = [y_rect1, y_rect2]
             return y_rect
     else:
