@@ -181,7 +181,7 @@ def ConleyMorseGraph(phase_subdiv, lower_bounds, upper_bounds, g, confidence_lev
             # Raise to the power 1/num_points so the product gives confidence level
             # confidence = confidence_level**(1 / (2**(phase_subdiv + 1)))
             # Get the alpha value
-            alpha = 1.0 - confidence
+            alpha = 1.0 - confidence_level
             # Get critical value
             z_critical = stats.norm.ppf(1.0 - alpha / 2)
             # Get end points of covering rectangle
