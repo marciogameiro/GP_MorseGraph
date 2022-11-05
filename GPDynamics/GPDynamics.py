@@ -7,6 +7,7 @@ import CMGDB
 import DSGRN
 
 import numpy as np
+from scipy import stats
 
 def Coordinates(box, phase_subdiv, lower_bounds, upper_bounds):
     # Returns coordinates of grid elements
