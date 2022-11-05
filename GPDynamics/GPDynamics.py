@@ -44,7 +44,7 @@ def box_cover(domain_boxes, rect):
     # Return -1 and/or n_verts if rect is out of range
     return list(range(v_min, v_max))
 
-def ComputeDomainGraph(phase_subdiv, lower_bounds, upper_bounds, g, confidence_level, L, check_range):
+def ComputeDomainGraph(phase_subdiv, lower_bounds, upper_bounds, g, confidence_level, L, enforce_bounds):
     # Flag for out of bounds
     out_of_bounds = False
     # List of phase space boxes
@@ -85,9 +85,10 @@ def ComputeDomainGraph(phase_subdiv, lower_bounds, upper_bounds, g, confidence_l
         # Get box cover of confidence interval
         b_cover = box_cover(domain_boxes, rect)
         # Check if image is out of range
-        if check_range and ((-1 in b_cover) or (num_points - 1 in b_cover)):
+        if (-1 in b_cover) or (num_points - 1 in b_cover):
             out_of_bounds = True
-            # raise ValueError('Image of multi-valued map out of bounds.')
+            if enforce_bounds:
+                raise ValueError('Image of multi-valued map out of bounds.')
         # Discard out of range cases (-1 and num_points - 1)
         # List of grid boxes indices covering interval
         grid_cover = [v for v in b_cover if v not in [-1, num_points - 1]]
@@ -122,9 +123,10 @@ def ComputeDomainGraph(phase_subdiv, lower_bounds, upper_bounds, g, confidence_l
         # Get box cover of confidence interval
         b_cover = box_cover(domain_boxes, rect)
         # Check if image is out of range
-        if check_range and ((-1 in b_cover) or (num_points - 1 in b_cover)):
+        if (-1 in b_cover) or (num_points - 1 in b_cover):
             out_of_bounds = True
-            # raise ValueError('Image of multi-valued map out of bounds.')
+            if enforce_bounds:
+                raise ValueError('Image of multi-valued map out of bounds.')
         # Discard out of range cases (-1 and num_points - 1)
         # List of grid boxes indices covering interval
         grid_cover = [v for v in b_cover if v not in [-1, num_points - 1]]
@@ -144,9 +146,10 @@ def ComputeDomainGraph(phase_subdiv, lower_bounds, upper_bounds, g, confidence_l
     # Get box cover of confidence interval
     b_cover = box_cover(domain_boxes, rect)
     # Check if image is out of range
-    if check_range and ((-1 in b_cover) or (num_points - 1 in b_cover)):
+    if (-1 in b_cover) or (num_points - 1 in b_cover):
         out_of_bounds = True
-        # raise ValueError('Image of multi-valued map out of bounds.')
+        if enforce_bounds:
+            raise ValueError('Image of multi-valued map out of bounds.')
     # Discard out of range cases (-1 and num_points - 1)
     # List of grid boxes indices covering interval
     grid_cover = [v for v in b_cover if v not in [-1, num_points - 1]]
@@ -160,7 +163,7 @@ def ComputeDomainGraph(phase_subdiv, lower_bounds, upper_bounds, g, confidence_l
         print('Image of multi-valued map out of bounds.')
     return domain_graph, domain_boxes
 
-def ConleyMorseGraph(phase_subdiv, lower_bounds, upper_bounds, g, confidence_level, L=None, check_range=False):
+def ConleyMorseGraph(phase_subdiv, lower_bounds, upper_bounds, g, confidence_level, L=None, enforce_bounds=False):
     """Compute Conley Morse graph for the GP map g"""
 
     if L == None:
@@ -188,7 +191,7 @@ def ConleyMorseGraph(phase_subdiv, lower_bounds, upper_bounds, g, confidence_lev
             return y_rect
     else:
         # Compute domain graph using Lispschitz constant
-        domain_graph, domain_boxes = ComputeDomainGraph(phase_subdiv, lower_bounds, upper_bounds, g, confidence_level, L, check_range)
+        domain_graph, domain_boxes = ComputeDomainGraph(phase_subdiv, lower_bounds, upper_bounds, g, confidence_level, L, enforce_bounds)
 
         # Define a new box map from the multi-valued map constructed above.
         # The image of a box is just a rectangle containing all the boxes
