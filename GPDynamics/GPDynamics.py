@@ -1,6 +1,6 @@
 # GPDynamics.py
 # Marcio Gameiro
-# 2022-11-04
+# 2022-11-08
 # MIT LICENSE
 
 import CMGDB
@@ -163,7 +163,7 @@ def ComputeDomainGraph(phase_subdiv, lower_bounds, upper_bounds, g, confidence_l
         print('Image of multi-valued map out of bounds.')
     return domain_graph, domain_boxes
 
-def ConleyMorseGraph(phase_subdiv, lower_bounds, upper_bounds, g, confidence_level, L=None, enforce_bounds=False):
+def ConleyMorseGraph(phase_subdiv, lower_bounds, upper_bounds, g, confidence_level, L=None, enforce_bounds=False, compute_index=True):
     """Compute Conley Morse graph for the GP map g"""
 
     if L == None:
@@ -212,5 +212,8 @@ def ConleyMorseGraph(phase_subdiv, lower_bounds, upper_bounds, g, confidence_lev
             return y_rect
 
     model = CMGDB.Model(phase_subdiv, lower_bounds, upper_bounds, F)
-    morse_graph, map_graph = CMGDB.ComputeConleyMorseGraph(model)
+    if compute_index:
+        morse_graph, map_graph = CMGDB.ComputeConleyMorseGraph(model)
+    else:
+        morse_graph, map_graph = CMGDB.ComputeMorseGraph(model)
     return morse_graph, map_graph
