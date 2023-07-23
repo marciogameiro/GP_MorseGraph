@@ -1,2 +1,2 @@
-# GPDynamics
-Gaussian Process Dynamics
+# GP_MorseGraph
+Gaussian Process Morse Graph
