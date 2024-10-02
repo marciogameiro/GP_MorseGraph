@@ -80,7 +80,10 @@ def ComputeDomainGraph(phase_subdiv, lower_bounds, upper_bounds, g, confidence_l
     # domain_graph = Digraph()
     # domain_graph = DSGRN.Digraph()
     # Set number of vertices
-    domain_graph.resize(num_verts)
+    # domain_graph.resize(num_verts)
+    # Add vertices to DiGraph
+    for k in range(num_verts):
+        domain_graph.add_vertex(k)
 
     # Get MVM edges for odd cells
     for k1 in range(1, num_verts, 2):
