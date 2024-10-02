@@ -1,10 +1,11 @@
 # GPDynamics.py
 # Marcio Gameiro
-# 2022-11-08
+# 2024-10-02
 # MIT LICENSE
 
 import CMGDB
-from DSGRN import Digraph
+import pychomp
+# from DSGRN import Digraph
 # import DSGRN
 
 import numpy as np
@@ -75,7 +76,8 @@ def ComputeDomainGraph(phase_subdiv, lower_bounds, upper_bounds, g, confidence_l
     # Number of vertices (edges)
     num_verts = len(domain_boxes) - 1
     # Construct digraph
-    domain_graph = Digraph()
+    domain_graph = pychomp.Digraph()
+    # domain_graph = Digraph()
     # domain_graph = DSGRN.Digraph()
     # Set number of vertices
     domain_graph.resize(num_verts)
